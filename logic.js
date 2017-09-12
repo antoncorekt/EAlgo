@@ -1,5 +1,8 @@
 'use strict';
 
+//import GraphicsEngine from './graphics.js';
+
+
 class Gene {
     constructor(x){
         this.x = x;
@@ -10,7 +13,7 @@ class Gene {
     }
 
     mutation(min, max){
-        this.x += (Math.random() * (max - min) + min)*0.001;
+        this.x += (Math.random() * (max - min) + min)*0.5;
     }
 
     toStr(){
@@ -73,6 +76,10 @@ class Model {
     this.populations = [];
 
     this.debug = false;
+
+    this.model_state  = new Object();
+    this.model_state.time_line = [];
+
   }
 
   // создание первой популяции
@@ -88,6 +95,7 @@ class Model {
         console.log(this.populations);
     }
 
+    this.model_state.time_line.push(this.populations.slice());
   }
 
   getBestResult(pop){
@@ -169,6 +177,7 @@ class Model {
             if (this.debug)
                 console.log("now will deleting gen " + stack[0].toStr());
             this.populations.splice(this.populations.indexOf(stack[0]),1);
+           // this.populations.splice(this.populations.indexOf(stack[1]),1);
 
             let children = Gene.crossover(parent_a, parent_b);
             this.populations.push(children);
@@ -181,17 +190,21 @@ class Model {
 
         new_best_result = this.getBestResult(this.populations);
 
+        this.model_state.time_line.push(this.populations.slice());
+
     }
    // while(false);
-    while(Math.abs(prev_best_result-new_best_result) < 0.001);
+    while(Math.abs(prev_best_result-new_best_result) < 0.00001);
 
 
     console.log("--->>>>>>>>>>>>>" + new_best_result);
+
+    return this.model_state;
   }
 
   
 }
 
 console.log("start");
-new Model(-20,20,500,10).process();
+//new Model(-20,20,500,10).process();
 console.log("end");
