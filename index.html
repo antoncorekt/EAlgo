@@ -2,22 +2,199 @@
 <html>
 <header>
     <title>LAB_1</title>
-    
+
     <script src="d3.min.js" type="text/javascript"></script>
-    <style src="style.css" type="text/css"> </style>
+    <style src="style.css" type="text/css">
+
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
+    <style>
+        .container {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .panel {
+            width: 300px;
+
+            border: 1 solid black;
+            border-radius: 20px;
+            background-color: rgba(190, 180, 100, 0.8);
+
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .grafic {
+            border-radius: 20px;
+            background-color: rgba(150, 180, 50, 0.3);
+        }
+
+        .text {
+            font-size: 25px;
+            text-align: center;
+            color: white;
+            font-family: Georgia;
+        }
+
+        .main {
+            font-size: 45px;
+            text-decoration: brown;
+        }
+
+        #myRange {
+            width: 90%;
+            -webkit-column-width: 100%;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            /* Hides the slider so that custom slider can be made */
+            width: 100%;
+            /* Specific width is required for Firefox. */
+            background: rgba(255, 255, 255, 0.1);
+            /* Otherwise white in Chrome */
+            border-radius: 5px;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+            /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+        }
+
+        input[type=range]::-ms-track {
+            width: 100%;
+            cursor: pointer;
+
+            /* Hides the slider so custom styles can be added */
+        }
+
+        .epoch {
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 0 10px 0 0;
+            padding: 8px 73px;
+            font-size: 25px;
+            font-family: "Bitter",serif;
+            line-height: 1.8;
+            appearance: none;
+            box-shadow: none;
+            color: white;
+            border-radius: 10px;
+            background-color: rgba(150, 45, 50, 0.5);
+            cursor:pointer;
+        }
+
+        .button:hover{
+            background-color: rgba(150, 45, 50, 0.9);
+        }
+
+        .info {
+            font-size: 12px;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        .inp {
+            margin-bottom: 10px;
+            width: 70%;
+        }
+    </style>
 </header>
 
 <body>
 
-    <input type="range" id="myRange">
-    <script src="logic.js" type="text/javascript"></script>
-    <script src="graphics.js" type="text/javascript"></script>
-   
-  
-    
+    <div class="container">
+        <div class="panel">
+            <div class="text main"> Grafic</div>
+            <hr color="white" width="100%">
+            <div class="text title"> Timeline </div>
 
+            <input type="range" id="myRange">
+            <div class="text epoch" id="epoch"> Epoch: 0</div>
+            
+            <hr color="white" width="100%">
+            <div class="text title"> Info </div>
+
+            <div class="text epoch" id="popul">Count populations: </div>
+            <div class="text epoch" id="new_child">New child in epoch: </div>
+            <div class="text epoch" id="best_res">Best result in epoch: </div>
+            <div class="text epoch" id="aver_res">Average result in epoch: </div>
+            <div class="text epoch" id="mutat">Mutation: </div>
+
+            <div class="text epoch " style="margin-top:5px;">Last gen info:</div>
+            <div class="text info" style="text-align:right" id="lastX">X: </div>
+            <div class="text info" style="text-align:right" id="lastY">Y: </div>
+            <div class="text info" style="text-align:right" id="lastType">Type: </div>
+            <hr color="white" width="100%">
+            <div class="text title"> Config </div>
+            <div class="text epoch " style="margin-top:5px;">Count populations:</div>
+            <input type="number" class="inp" id="count" min="1" value=50>
+            <div class="text epoch ">Function:</div>
+            <input type="text" class="inp" id="func" value="">
+            <div class="text epoch ">Limets:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="limit_x" value=-20>
+                To:<input type="number" style="width: 40px" id="limit_y" value=20>
+            </span>
+            <div class="text epoch " style="margin-top:5px;">Mutation chance:</div>
+            <input type="number" class="inp" id="mut" min="0" max="100" value=10>
+            <div class="text epoch ">X Axis:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="from_axis_x" value=-20>
+                To:<input type="number" style="width: 40px" id="to_axis_x" value=20>
+            </span>
+            <div class="text epoch "  style="margin-top:5px;">Y Axis:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="from_axis_y" value=-20>
+                To:<input type="number" style="width: 40px" id="to_axis_y" value=20>
+            </span>
+            <hr color="white" width="100%">
+           
+
+            <div class="button">Modeling</div>
+        </div>
+
+        <div class="grafic">
+            <script src="logic.js" type="text/javascript"></script>
+            <script src="graphics.js" type="text/javascript"></script>
+
+
+            <script>
+                new GraphicsEngine(-20, 20, 50, 10, 8, -20, 20, -20, 20).f();
+                $(document).ready(function(e){
+                    $(".button").click(function(){
+                        $("svg").remove();
+                        let left =Number.parseFloat($("#limit_x").val());
+                        let right = Number.parseFloat($("#limit_y").val());
+                        let count = Number.parseInt($("#count").val());
+                        let proc = 7;
+                        let chance = Number.parseFloat($("#mut").val());
+                        let xL = Number.parseFloat($("#from_axis_x").val());
+                        let xR = Number.parseFloat($("#to_axis_x").val());
+                        let yB = Number.parseFloat($("#from_axis_y").val());
+                        let yT = Number.parseFloat($("#to_axis_y").val());
+                         
+
+
+                        new GraphicsEngine(left, right, count, chance, proc, xL, xR, yB, yT).f();
+                    })
+                });
+
+
+               
+            </script>
+
+        </div>
+    </div>
 
 </body>
 

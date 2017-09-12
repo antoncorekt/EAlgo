@@ -4,20 +4,34 @@
 
 
 class Gene {
-    constructor(x){
+    constructor(x, child){
         this.x = x;
+
+        this.mut = false;
+        this.child = child;
+        //this.father = false;
+        this.die = false;
+        this.best = false;
     }
 
     static crossover(a,b){
-        return new Gene((a+b)/2.);
+        return new Gene((a.x+b.x)/2., true);
     }
 
     mutation(min, max){
+        this.mut = true;
         this.x += (Math.random() * (max - min) + min)*0.5;
+        
     }
 
     toStr(){
         return "[ "+this.x+" ]";
+    }
+
+    reset(){
+        this.mut = false;
+        this.child = false;
+        this.best = false;
     }
 }
 
@@ -67,11 +81,12 @@ class Model {
   // [left ; right] - ограничения
   // count - начальное кол-во популяции
   // mutation - максимальный процент мутировавших генов от популяции
-  constructor(left, right, count, mutation) {
+  constructor(left, right, count, mutation, chance) {
     this.left = left;
     this.right = right;
     this.count = count;
     this.mutation = mutation;
+    this.chance = chance;
 
     this.populations = [];
 
@@ -87,13 +102,11 @@ class Model {
 
     for(let i=0; i<this.count; i++){
         this.populations.push(
-            new Gene(Util.getFloatRandom(this.left, this.right))
+            new Gene(Util.getFloatRandom(this.left, this.right),false)
         );
     }
 
-    if (this.debug){
-        console.log(this.populations);
-    }
+    this.populations[this.getIndexBestResult(this.populations)].best = true;
 
     this.model_state.time_line.push(this.populations.slice());
   }
@@ -112,89 +125,120 @@ class Model {
       return max;
   }
 
+  getIndexBestResult(pop){
+    let max = Util.f(pop[0]);
+    let res = 0;
+
+    for (let i=1; i<pop.length; i++){
+        let t = Util.f(pop[i]);
+        if(t>max){
+            max = t;
+            res = i;
+        }
+    }
+
+    return res;
+}
+
+getObjBestResult(pop){
+    let max = Util.f(pop[0]);
+    let res = pop[0];
+
+    for (let i=1; i<pop.length; i++){
+        let t = Util.f(pop[i]);
+        if(t>max){
+            max = t;
+            res = pop[i];
+        }
+    }
+
+    return res;
+}
+
+
   process() {
     this.createFirstPopulation();
     
     let prev_best_result;
     let new_best_result = prev_best_result = this.getBestResult(this.populations);
+    
 
     let i = 0;
     let count_mutation = 0;
+
+    let trys = new Array(this.chance);
+
     do {
-        if (this.debug){
-            console.log("-----------------------------------------------------------------");
-            console.log("-----------------------------------------------------------------");
-            console.log(i+ " iteration");
-            console.log("prev_best_result -> " + prev_best_result);
-        }
+       
         count_mutation = 0;
 
         prev_best_result = new_best_result;
+       this.populations.forEach((x)=>x.reset());
 
-        if (this.debug)
-            console.log("----start mutation process");
+        // mutations process
         for(let j=0; j<this.populations.length; j++){
+            if (this.populations[i].die) continue;
+
             if (Util.getPsevdoRandomChance(this.mutation,this.populations.length,this.populations.length-j,count_mutation)){
                 count_mutation++;
                 this.populations[j].mutation;
-                if (this.debug){
-                    console.log(j + " gen mutated -> " + this.populations[j].x);
-                }
             }
         }
-        if (this.debug)
-            console.log("end mutation process-----\n");
-        
-        if (this.debug)
-            console.log("start make children-------- will be " + this.populations.length/4 +  " iterates");
-        for(let j=0; j<this.populations.length/4; j++){
+     
+        let len = this.populations.length/2;
+        for(let j=0; j<len; j++){
             let stack = [];
             let index_stack = [];
 
             for(let k=0; k<4; k++){
                 let rand = Util.getIntRandom(0,this.populations.length-1);
+                if (this.populations[rand].die) {
+                    k--;
+                    continue;
+                }
+
                 index_stack.push(rand);
                 stack.push(this.populations[rand]);
             }
-            if (this.debug){
-                console.log("Choose 4 random genes, their indexes -> " + index_stack );
-                console.log(stack);
+          
 
-            }
-
-            let parent_a = this.getBestResult(stack);
+            let parent_a = this.getObjBestResult(stack);
             stack.splice(stack.indexOf(parent_a),1);
 
-            if (this.debug)
-                console.log("parent_a -> " + parent_a.toString());
 
-            let parent_b = this.getBestResult(stack);
+
+            let parent_b = this.getObjBestResult(stack);
             stack.splice(stack.indexOf(parent_b),1);
 
-            if (this.debug)
-                console.log("parent_b -> " + parent_b.toString());
-            
-            if (this.debug)
-                console.log("now will deleting gen " + stack[0].toStr());
+            if (this.populations.indexOf(stack[0])==-1){
+                console.log("dsufhvfukvhsujfdgvshdfuvhsdkufhvkiuxjgfvlifglivsfd");
+            }
             this.populations.splice(this.populations.indexOf(stack[0]),1);
+
+            //stack.forEach((x)=>x.die = true);
+            //stack[0].die = true;
+
            // this.populations.splice(this.populations.indexOf(stack[1]),1);
 
             let children = Gene.crossover(parent_a, parent_b);
             this.populations.push(children);
 
-            if (this.debug)
-                console.log("add children " + children.toStr());
+           
         }
-        if (this.debug)
-            console.log("end make children--------");
+        //console.log("--->>>>>>>>>>>>>" + new_best_result);
+
 
         new_best_result = this.getBestResult(this.populations);
 
+        this.populations[this.getIndexBestResult(this.populations)].best = true;
+
         this.model_state.time_line.push(this.populations.slice());
 
+        if (Math.abs(prev_best_result-new_best_result) < 0.00001){
+            trys.splice(0,1);
+        }
     }
-   // while(false);
-    while(Math.abs(prev_best_result-new_best_result) < 0.00001);
+    while(trys.length>=1);
 
 
     console.log("--->>>>>>>>>>>>>" + new_best_result);
