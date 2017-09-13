@@ -24,7 +24,7 @@ class GraphicsEngine {
 
         this.data = this.model.process();
 
-        console.log(this.data);
+       // console.log(this.data);
 
 
     }
@@ -120,7 +120,7 @@ class GraphicsEngine {
                 return xScale(d[0]);
             })          // position the circle at 40 on the x axis
             .attr('cy', function (d) {
-                console.log("->>>>>" + d);
+               // console.log("->>>>>" + d);
                 return yScale(d[1]);
             })// position the circle at 250 on the y axis
              .transition()             // apply a transition
@@ -128,7 +128,7 @@ class GraphicsEngine {
              .duration(1000) 
                      // apply it over 2000 milliseconds
                      .attr('cx',function (d, e) {
-                        console.log(self.data.time_line[num][e].x);
+                        //console.log(self.data.time_line[num][e].x);
                         return xScale(self.data.time_line[num][e].x);
                     })          // position the circle at 40 on the x axis
                     .attr('cy', function (d, e) {
