@@ -92,7 +92,7 @@ class GraphicsEngine {
 
         var dataset = [];
 
-        console.log(this.data);
+       // console.log(this.data);
 
 
         for (let i = 0; i < this.data.time_line[num].length; i++) {
@@ -112,32 +112,84 @@ class GraphicsEngine {
             .domain([this.yB, this.yT])
             .range([h - padding, padding]);
 
-        /* d3.select('svg')
+            let self = this;
+         d3.select('svg')
              .selectAll('circle')
-             .attr("fill", "steelblue")
+             
              .attr('cx',function (d) {
-                 return xScale(d[0]);
-             })          // position the circle at 40 on the x axis
-             .attr('cy', function (d) {
-                 return yScale(d[1]);
-             }) // position the circle at 250 on the y axis
+                return xScale(d[0]);
+            })          // position the circle at 40 on the x axis
+            .attr('cy', function (d) {
+                console.log("->>>>>" + d);
+                return yScale(d[1]);
+            })// position the circle at 250 on the y axis
              .transition()             // apply a transition
              .ease(d3.easeLinear)           // control the speed of the transition
-             .duration(4000) 
+             .duration(1000) 
                      // apply it over 2000 milliseconds
-                     .attr('cx',function (d) {
-                         return xScale(d[0]);
-                     })          // position the circle at 40 on the x axis
-                     .attr('cy', function (d) {
-                         console.log("->>>>>" + d);
-                         return yScale(d[1]+5);
-                     }); */
+                     .attr('cx',function (d, e) {
+                        console.log(self.data.time_line[num][e].x);
+                        return xScale(self.data.time_line[num][e].x);
+                    })          // position the circle at 40 on the x axis
+                    .attr('cy', function (d, e) {
+                        return yScale(Util.f(self.data.time_line[num][e]));
+                    })
+                    .on("mouseover", (d, i) => {
+                        $(document).ready(function (e) {
+                            $("#lastX").text("X: " + d[0]);
+                            $("#lastY").text("Y: " + d[1]);
+                            let s = "";
+                            if (d[2].child) s += "CHILD ";
+                            if (d[2].best) s += "BEST ";
+                            if (d[2].mut) s += "MUTABLES ";
+                            $("#lastType").text("Type: " + s);
+                        });
+                    })
+                    .on("mouseout", (d, i) => {
+                        $(document).ready(function (e) {
+        
+                        });
+                    })
+                    .attr("fill", function (d) {
+                //console.log(d[3])
+                if (d[2].child) {
+                    return "green";
+                }
+
+                if (d[2].die) {
+                    return "magenta";
+                }
+
+                if (d[2].best) {
+                    return "red";
+                }
+
+                return "black";
+            })
+            .attr("r", function (d) {
+                if (d[2].die) {
+                    return 2;
+                }
+
+                if (d[2].child) {
+                    return 4;
+                }
+
+                if (d[2].best) {
+                    return 6;
+                }
+
+                return 3;
+            })
+           ; 
+
+                     
 
 
 
 
 
-        d3.select('svg')
+        /*d3.select('svg')
             .selectAll('circle')
             .remove();
 
@@ -198,7 +250,7 @@ class GraphicsEngine {
                 $(document).ready(function (e) {
 
                 });
-            });
+            });*/
 
 
 
@@ -228,6 +280,20 @@ class GraphicsEngine {
         var yAxis = d3.axisLeft()
             .scale(yScale);
 
+            var dataset = [];
+            
+                   // console.log(this.data);
+            
+            
+                    for (let i = 0; i < this.data.time_line[num].length; i++) {
+                        let t = [];
+                        t.push(this.data.time_line[num][i].x);
+                        t.push(Util.f(this.data.time_line[num][i]));
+                        t.push(this.data.time_line[num][i]);
+                        //t.push(0);
+                        dataset.push(t);
+                    }
+            
 
         //Create SVG element
         var svg = d3.select(".grafic")
@@ -235,7 +301,64 @@ class GraphicsEngine {
             .attr("width", w)
             .attr("height", h);
 
-        this.update(0);
+            d3.select('svg')
+            .selectAll('circle')
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("fill", function (d) {
+                //console.log(d[3])
+                if (d[2].child) {
+                    return "green";
+                }
+
+                if (d[2].die) {
+                    return "magenta";
+                }
+
+                if (d[2].best) {
+                    return "red";
+                }
+
+                return "black";
+            })
+            .attr("cx", function (d) {
+                return xScale(d[0]);
+            })
+            .attr("cy", function (d) {
+                return yScale(d[1]);
+            })
+            .attr("r", function (d) {
+                if (d[2].die) {
+                    return 2;
+                }
+
+                if (d[2].child) {
+                    return 4;
+                }
+
+                if (d[2].best) {
+                    return 6;
+                }
+
+                return 3;
+            })
+            .on("mouseover", (d, i) => {
+                $(document).ready(function (e) {
+                    $("#lastX").text("X: " + d[0]);
+                    $("#lastY").text("Y: " + d[1]);
+                    let s = "";
+                    if (d[2].child) s += "CHILD ";
+                    if (d[2].best) s += "BEST ";
+                    if (d[2].mut) s += "MUTABLES ";
+                    $("#lastType").text("Type: " + s);
+                });
+            })
+            .on("mouseout", (d, i) => {
+                $(document).ready(function (e) {
+
+                });
+            });
 
         //Create labels
         /* svg.selectAll("text")
@@ -254,6 +377,9 @@ class GraphicsEngine {
             .attr("font-family", "sans-serif")
             .attr("font-size", "11px")
             .attr("fill", "red");*/
+
+
+            
 
 
         //Create X axis
