@@ -67,7 +67,7 @@ class Util {
     }
     else{
         
-    return math.eval(pole.value.replace("x", x));
+    return math.eval(pole.value.replace(new RegExp("x", 'g'), x));
     }
 
   }
