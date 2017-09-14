@@ -8,20 +8,34 @@ class Gene {
         this.x = x;
 
         this.mut = false;
-        this.child = child;
-        //this.father = false;
+        this.child = child
+        this.father = false;
         this.die = false;
         this.best = false;
+        this.parents = [];
+
+       
     }
 
     static crossover(a,b){
-        return new Gene((a.x+b.x)/2., true);
+        a.father = true;
+        b.father = true;
+        let gene = new Gene((a.x+b.x)/2., true);
+        gene.parents.push(a);
+        gene.parents.push(b);
+        return gene;
     }
 
     mutation(min, max){
         this.mut = true;
-        this.x += (Math.random() * (max - min) + min)*0.5;
+        this.x += Util.getFloatRandom(min, max)*0.1;
+        if(this.x >  max) this.x=max;
+        if(this.x < min) this.x = min;
         
+    }
+
+    makeBest(){
+        this.best = true;
     }
 
     toStr(){
@@ -32,6 +46,8 @@ class Gene {
         this.mut = false;
         this.child = false;
         this.best = false;
+        this.father = false;
+        this.parents = [];
     }
 }
 
@@ -42,7 +58,18 @@ class Util {
     // return float
   static f(obj){
     let x = obj.x;
-    return (4 - x)*Math.cos(0.5 * x - 1.5);
+    //
+
+    let pole = document.getElementById("func");
+    
+    if(pole.value === ""){
+        return (4 - x)*Math.cos(0.5 * x - 1.5);
+    }
+    else{
+        
+    return math.eval(pole.value.replace("x", x));
+    }
+
   }
 
   // Возвращает случайное вещественное число между min (включительно) и max (не включительно)
@@ -60,6 +87,23 @@ class Util {
   
   static isRandomProc(procent){    
       return Util.getFloatRandom(0,100)<=procent;
+  }
+
+  static copyPopulations(populations){
+      let res = [];
+      for(let i=0; i<populations.length; i++){
+          res.push(new Gene(populations[i].x, populations[i].child));
+          
+          res[i].mut = populations[i].mut;
+          res[i].die = populations[i].die;
+          res[i].best = populations[i].best;
+          res[i].father = populations[i].father;
+          if(populations[i].child){
+          res[i].parents[0] = populations[i].parents[0];
+          res[i].parents[1] = populations[i].parents[1];
+          }
+      }
+      return res;
   }
 
   // Псевдорандом
@@ -81,12 +125,14 @@ class Model {
   // [left ; right] - ограничения
   // count - начальное кол-во популяции
   // mutation - максимальный процент мутировавших генов от популяции
-  constructor(left, right, count, mutation, chance) {
+  constructor(left, right, count, mutation, chance, precition, max_epoch) {
     this.left = left;
     this.right = right;
     this.count = count;
     this.mutation = mutation;
     this.chance = chance;
+    this.precition = precition;
+    this.max_epoch = max_epoch;
 
     this.populations = [];
 
@@ -102,13 +148,14 @@ class Model {
 
     for(let i=0; i<this.count; i++){
         this.populations.push(
-            new Gene(Util.getFloatRandom(this.left, this.right),false)
+            new Gene(Util.getFloatRandom(this.left, this.right), false)
         );
     }
 
-    this.populations[this.getIndexBestResult(this.populations)].best = true;
+    this.populations[this.getIndexBestResult(this.populations)].makeBest();
 
-    this.model_state.time_line.push(this.populations.slice());
+    this.model_state.time_line.push(Util.copyPopulations(this.populations));
+
   }
 
   getBestResult(pop){
@@ -169,31 +216,38 @@ getObjBestResult(pop){
     let trys = new Array(this.chance);
 
     do {
-       
+        i++;
         count_mutation = 0;
 
         prev_best_result = new_best_result;
-       this.populations.forEach((x)=>x.reset());
+        let die_gen = 0;
+       this.populations.forEach((x)=>{x.reset(); if(x.die)die_gen++;});
 
         // mutations process
-        for(let j=0; j<this.populations.length; j++){
+        let t = this.populations.length;
+        let max_count_mutation = 100/(t-die_gen)*this.mutation;
+        for(let j=0; j<t; j++){
             if (this.populations[i].die) continue;
 
             if (Util.getPsevdoRandomChance(this.mutation,this.populations.length,this.populations.length-j,count_mutation)){
+                
                 count_mutation++;
-                this.populations[j].mutation;
+                this.populations[j].mutation(this.left, this.right);
             }
+            
         }
      
-        let len = this.populations.length/2;
+        let len = (t-die_gen)/2;
         for(let j=0; j<len; j++){
             let stack = [];
             let index_stack = [];
 
+            if(die_gen-4>=t) break;
+
             for(let k=0; k<4; k++){
                 let rand = Util.getIntRandom(0,this.populations.length-1);
-                if (this.populations[rand].die) {
-                    k--;
+                if (this.populations[rand].die && !this.populations[rand].child && !this.populations[rand].father) {
+                    k--; 
                     continue;
                 }
 
@@ -204,19 +258,20 @@ getObjBestResult(pop){
 
             let parent_a = this.getObjBestResult(stack);
             stack.splice(stack.indexOf(parent_a),1);
+           
 
 
 
             let parent_b = this.getObjBestResult(stack);
             stack.splice(stack.indexOf(parent_b),1);
+            
 
-            if (this.populations.indexOf(stack[0])==-1){
-                console.log("dsufhvfukvhsujfdgvshdfuvhsdkufhvkiuxjgfvlifglivsfd");
-            }
-            this.populations.splice(this.populations.indexOf(stack[0]),1);
+         
+           // this.populations.splice(this.populations.indexOf(stack[0]),1);
 
             //stack.forEach((x)=>x.die = true);
-            //stack[0].die = true;
+            stack[0].die = true;
+
 
            // this.populations.splice(this.populations.indexOf(stack[1]),1);
 
@@ -225,18 +280,19 @@ getObjBestResult(pop){
 
            
         }
-        //console.log("--->>>>>>>>>>>>>" + new_best_result);
-
-
         new_best_result = this.getBestResult(this.populations);
 
-        this.populations[this.getIndexBestResult(this.populations)].best = true;
+        this.populations[this.getIndexBestResult(this.populations)].makeBest();
 
-        this.model_state.time_line.push(this.populations.slice());
+        this.model_state.time_line.push(Util.copyPopulations(this.populations));
 
-        if (Math.abs(prev_best_result-new_best_result) < 0.00001){
+        if (Math.abs(prev_best_result-new_best_result) < this.precition){
             trys.splice(0,1);
         }
+        
+        if(this.max_epoch <= i)
+            break;
+
     }
     while(trys.length>=1);
 
