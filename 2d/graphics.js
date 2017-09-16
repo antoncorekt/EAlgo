@@ -5,8 +5,8 @@ class GraphicsEngine {
 
     // [left ; right] - область допустимых значений
     // count - размер популяции
-    // chance - шанс мутации
-    // proc - дополнительные эпохи после достищения нужно точности между эпохами
+    // proc - шанс мутации
+    // chance - дополнительные эпохи после достищения нужно точности между эпохами
     // precition - точность, при достижении который алгоритм заканчивается
     // max_epoch - ограничение в эпохах
     // [xL ; xR] - ось X
@@ -25,14 +25,21 @@ class GraphicsEngine {
         this.yB = yB;
         this.yT = yT;
 
+        if (count < 1){
+            throw "Error. Count population less then 1";
+        }
+
+        if(proc < 0 && proc > 100){
+            throw "Error. Incorrect mutation chance";
+        }
+
+        if(precition < 0)
+            throw "Error. Incorrect precitions";
+
         this.model = new Model(left, right, count, proc, chance, precition, max_epoch);
 
         this.data = null;
         this.data = this.model.process();
-
-
-        console.log(this.data);
-
 
     }
 
@@ -76,7 +83,7 @@ class GraphicsEngine {
                 $("#popul").text("Count populations: " + all);
                 $("#die").text("Count dead gens: " + die);
                 $("#new_child").text("New child in epoch: " + child);
-                $("#best_res").text("Best result in epoch: " + self.model.getBestResult(self.data.time_line[val]));
+                $("#best_res").text("Best result in epoch: " + self.model.getBestRes(self.data.time_line[val], "f(x)"));
                 $("#aver_res").text("Average result in epoch: " + sum / self.data.time_line[val].length);
                 $("#mutat").text("Mutation: " + mut);
             }
@@ -114,7 +121,6 @@ class GraphicsEngine {
 
         let dataset = [];
 
-        //console.log(this.data.time_line[num]);
         let self = this;
 
         for (let i = 0; i < this.data.time_line[num].length; i++) {
@@ -134,26 +140,19 @@ class GraphicsEngine {
             .range([h - padding, padding]);
 
 
+        // перед обновление удалям все гены
         d3.select('svg')
             .selectAll('circle')
             .remove();
 
         let get_radius = function(obj){
-            if (obj.die) {
-                return 2;
-            }
+            if (obj.die) return 2;
 
-            if (obj.best) {
-                return 6;
-            }
+            if (obj.best) return 6;
 
-            if (obj.child) {
-                return 4;
-            }
+            if (obj.child) return 4;
 
-            if (obj.mut) {
-                return 3.2;
-            }
+            if (obj.mut) return 3.2;
 
             return 3;
         }
@@ -162,7 +161,7 @@ class GraphicsEngine {
             .selectAll('circle')
             .data(dataset)
             .enter()
-            .append("circle")
+            .append("circle") 
             .attr("fill", function (d) {
 
                 if (d[2].best) {
@@ -176,7 +175,7 @@ class GraphicsEngine {
                 }
 
                 if (d[2].die) {
-                    return "rgba(0,0,0," + ((num + 1) / self.data.time_line[num].length + 0.1) + ")";
+                    return "rgba(0,0,0," + ((self.data.time_line.length - num ) / self.data.time_line.length + 0.1) + ")";
                 }
 
                 return "black";
@@ -195,9 +194,6 @@ class GraphicsEngine {
                 
             })
             .on("mouseover", (d, i) => {
-               
-                
-
                 $(document).ready(function (e) {
                     $("#lastX").text("X: " + d[0]);
                     $("#lastY").text("Y: " + d[1]);
@@ -214,7 +210,7 @@ class GraphicsEngine {
                     if(d[2].child){
                         let par_a = document.getElementById(d[2].parents[0].x +" " + Util.f(d[2].parents[0]));
                         let par_b = document.getElementById(d[2].parents[1].x +" " + Util.f(d[2].parents[1])); 
-                        //console.log(d[2].parents[0].x +" " + Util.f(d[2].parents[0].x));
+
                         par_a.setAttribute("r",10);
                         par_b.setAttribute("r",10);
                     }
@@ -227,7 +223,7 @@ class GraphicsEngine {
                 if(d[2].child){
                     let par_a = document.getElementById(d[2].parents[0].x +" " + Util.f(d[2].parents[0]));
                     let par_b = document.getElementById(d[2].parents[1].x +" " + Util.f(d[2].parents[1])); 
-                    //console.log(d[2].parents[0].x +" " + Util.f(d[2].parents[0].x));
+
                     par_a.setAttribute("r",get_radius(d[2]));
                     par_b.setAttribute("r",get_radius(d[2]));
                 }

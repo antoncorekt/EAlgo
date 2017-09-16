@@ -33,6 +33,7 @@
         .grafic {
             border-radius: 20px;
             background-color: rgba(150, 180, 50, 0.3);
+            width: 100%;
         }
 
         .text {
@@ -101,6 +102,13 @@
         .inp {
             margin-bottom: 10px;
             width: 70%;
+        }
+
+        .fatal-error { 
+            color: red;
+            font-size: 72;
+            text-align: center;
+            padding-top: 150px;
         }
     </style>
 </header>
@@ -174,8 +182,10 @@
                 let gr = new GraphicsEngine(-20, 20, 50, 10, 8, 0.00001, 50, -20, 20, -20, 20).f();
                 $(document).ready(function(e){
                     $(".button").click(function(){
+                        try{
                         gr = null;
                         $("svg").remove();
+                        $(".err").remove();
                         let left =Number.parseFloat($("#limit_x").val());
                         let right = Number.parseFloat($("#limit_y").val());
                         let count = Number.parseInt($("#count").val());
@@ -188,10 +198,15 @@
                         let xR = Number.parseFloat($("#to_axis_x").val());
                         let yB = Number.parseFloat($("#from_axis_y").val());
                         let yT = Number.parseFloat($("#to_axis_y").val());
+                 
                          
-
-                       // new GraphicsEngine(-20, 20, 50, 10, 1, 0.001, 50, -20, 20, -20, 20).f();
                         gr = new GraphicsEngine(left, right, count, mutations_chance, chance, precition, max_epoch, xL, xR, yB, yT).f();
+                        }
+                        catch(e){
+                            //alert("Engine error. " + e);
+                            $(".grafic").append("<div class='err' style='color: red;font-size: 72px;  text-align: center;padding-top: 150px;'> Engine error <br> " + e + "</div>");
+                            
+                        }
                     })
 
                     $("#limit_x").change(function(){
