@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <title>LAB_2</title>
+
+    <script src="lib/d3.min.js" type="text/javascript"></script>
+    <script src="lib/math.js" type="text/javascript"></script>
+    <script src="lib/plotly-latest.min.js" type="text/javascript"></script>
+    <link href="style/style.css" rel="stylesheet">
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <style>
+
+    </style>
+</header>
+
+<body>
+
+    <div class="container">
+        <div class="panel">
+            <div class="text main"> Grafic</div>
+            <hr color="white" width="100%">
+            <div class="text title"> Timeline </div>
+
+            <input type="range" id="myRange">
+            <div class="text epoch" id="epoch"> Epoch: 0</div>
+            
+            <hr color="white" width="100%">
+            <div class="text title"> Info </div>
+
+            <div class="text epoch" id="popul">Count populations: </div>
+            <div class="text epoch" id="die">Count dead gens: </div>
+            <div class="text epoch" id="new_child">New child in epoch: </div>
+            <div class="text epoch" id="best_res">Best result in epoch: </div>
+            <div class="text epoch" id="aver_res">Average result in epoch: </div>
+            <div class="text epoch" id="mutat">Mutation: </div>
+
+            <div class="text epoch " style="margin-top:5px;">Last gen info:</div>
+            <div class="text info" style="text-align:right" id="lastX">X: </div>
+            <div class="text info" style="text-align:right" id="lastY">Y: </div>
+            <div class="text info" style="text-align:right" id="lastType">Type: </div>
+            <hr color="white" width="100%">
+            <div class="text title"> Config </div>
+            <div class="text epoch " style="margin-top:5px;">Count populations:</div>
+            <input type="number" class="inp" id="count" min="1" value=50>
+            <div class="text epoch ">Function:</div>
+            <input type="text" class="inp" id="func" value="">
+            <div class="text epoch ">Limets:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="limit_x" value=-20>
+                To:<input type="number" style="width: 40px" id="limit_y" value=20>
+            </span>
+            <div class="text epoch " style="margin-top:5px;">Adjustment of algorithm end:</div>
+            <span class="text info">
+                Precisions:<input type="number" style="width: 70px" id="prec" value=0.0001>
+                Extra chanse:<input type="number" style="width: 40px" id="add_epoch" value=7><br>
+                Max epoch:<input type="number" style="width: 40px" id="max_epoch" value=50>
+            </span>
+            <div class="text epoch " style="margin-top:5px;">Mutation chance:</div>
+            <input type="number" class="inp" id="mut" min="0" max="100" value=10>
+            <div class="text epoch ">X Axis:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="from_axis_x" value=-20>
+                To:<input type="number" style="width: 40px" id="to_axis_x" value=20>
+            </span>
+            <div class="text epoch "  style="margin-top:5px;">Y Axis:</div>
+            <span class="text info">
+                From:<input type="number" style="width: 40px" id="from_axis_y" value=-20>
+                To:<input type="number" style="width: 40px" id="to_axis_y" value=20>
+            </span>
+            <hr color="white" width="100%">
+           
+
+            <div class="button">Modeling</div>
+        </div>
+
+        <div class="grafic" id="engine">
+            <script src="logic/util.js" type="text/javascript"></script>
+            <script src="logic/model.js" type="text/javascript"></script>
+            <script src="engine/graphics.js" type="text/javascript"></script>
+
+
+            <script>
+               
+                $(document).ready(function(e){
+                    $(".button").click(function(){
+                        try{
+                            let left =Number.parseFloat($("#limit_x").val());
+                            let right = Number.parseFloat($("#limit_y").val());
+                            let count = Number.parseInt($("#count").val());
+                            let chance = Number.parseFloat($("#add_epoch").val());
+                            let mutations_chance = Number.parseFloat($("#mut").val());
+                            let precition = Number.parseFloat($("#prec").val());
+                            let max_epoch = Number.parseFloat($("#max_epoch").val());
+            
+                            let xL = Number.parseFloat($("#from_axis_x").val());
+                            let xR = Number.parseFloat($("#to_axis_x").val());
+                            let yB = Number.parseFloat($("#from_axis_y").val());
+                            let yT = Number.parseFloat($("#to_axis_y").val());
+                    
+                         
+                       
+                        }
+                        catch(e){
+                           
+                            $(".grafic").append("<div class='err' style='color: red;font-size: 72px;  text-align: center;padding-top: 150px;'> Engine error <br> " + e + "</div>");
+                            
+                        }
+                    })
+
+                    $("#limit_x").change(function(){
+                        $("#from_axis_y").val($("#limit_x").val());
+                        $("#from_axis_x").val($("#limit_x").val());
+                    });
+                    $("#limit_y").change(function(){
+                        $("#to_axis_y").val($("#limit_y").val());
+                        $("#to_axis_x").val($("#limit_y").val());
+                    });
+                });
+
+
+               
+            </script>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
