@@ -77,13 +77,15 @@
         </div>
 
         <div class="grafic" id="engine">
+            <script src="logic/gene.js" type="text/javascript"></script>
             <script src="logic/util.js" type="text/javascript"></script>
+            <script src="logic/population.js" type="text/javascript"></script>
             <script src="logic/model.js" type="text/javascript"></script>
             <script src="engine/graphics.js" type="text/javascript"></script>
 
 
             <script>
-               
+               let k = new GraphicsEngine(-20, 20).f();
                 $(document).ready(function(e){
                     $(".button").click(function(){
                         try{
@@ -101,7 +103,7 @@
                             let yT = Number.parseFloat($("#to_axis_y").val());
                     
                          
-                       
+                        
                         }
                         catch(e){
                            
