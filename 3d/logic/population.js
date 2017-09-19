@@ -10,7 +10,7 @@ class PopulationServise {
 
     createFirstPopulation(left, right, count) {
         for (let i = 0; i < count; i++) {
-            this.population.push(new Gene(Util.getFloatRandom(left, right),Util.getFloatRandom(left, right), false));
+            this.population.push(new Gene(Util.getFloatRandom(left, right), Util.getFloatRandom(left, right), false));
         }
         this.left = left;
         this.right = right;
@@ -36,45 +36,49 @@ class PopulationServise {
             let parent_b = Util.getBestResult(candid, "Object");
             candid.splice(Util.getBestResult(candid, "Index"), 1);
 
-            if (candid.length>0){
-            let die_obj = Util.getWorstResult(candid, "Object");
-            die_obj.die = true;
+            if (candid.length > 0) {
+                let die_obj = Util.getWorstResult(candid, "Object");
+                die_obj.die = true;
             }
             return Gene.crossover(parent_a, parent_b);
         }
 
         let j = 0;
         let candidants = [];
-        for (let i = 0; i < cur_pop_len; i++) {
-            if (this.population[i].die) continue;
-            if (this.population[i].parent) continue;
+        for (let i = 0; i < (cur_pop_len - die_gen) / 4; i++) {
 
-            if (j < 4) {
-                candidants.push(this.population[i]);
+            for (let k = 0; k < 4; k++) {
+                let rand = Util.getIntRandom(0, this.population.length - 1);
+                if (this.population[rand].die || this.population[rand].parent || j > 100) {
+                    k--;
+                    j++;
+                    continue
+                };
+
+                candidants.push(this.population[rand]);
                 j++;
             }
-            else {
-                this.population.push(createNewChildren(candidants));
-                candidants = [];
-                j=0;
-            }
 
-
-            
+            this.population.push(createNewChildren(candidants));
+            candidants = [];
+            j = 0;
         }
-        if(candidants.length>2)
-             createNewChildren(candidants);
 
-        let best_gene = Util.getBestResult(this.population,"Object");
+
+
+        if (candidants.length > 2)
+            createNewChildren(candidants);
+
+        let best_gene = Util.getBestResult(this.population, "Object");
         best_gene.best = true;
 
         this.count++;
 
     }
 
-    write_to_timeline(){
+    write_to_timeline() {
         this.time_line.push(Util.copyPopulations(this.population));
-        this.population.forEach((x)=> x.reset());
+        this.population.forEach((x) => x.reset());
     }
 
 

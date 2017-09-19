@@ -16,7 +16,7 @@ class Gene {
 
     static crossover(parent_a, parent_b){
         let x = (parent_a.x + parent_b.x)/2.;
-        let y = (parent_a.y  +parent_b.y)/2.;
+        let y = (parent_a.y + parent_b.y)/2.;
         let child = new Gene(x,y,true);
         child.parents.push(parent_a);
         child.parents.push(parent_b);

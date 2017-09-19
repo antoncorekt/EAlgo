@@ -4,13 +4,13 @@ class Model {
     constructor(){
 
         this.service = new PopulationServise(10);
-        this.service.createFirstPopulation(-20,20,50);
+        this.service.createFirstPopulation(-20,20,500);
     }
 
 
     f(){
 
-        let max_epoch = 5, i = 0;
+        let max_epoch = 20, i = 0;
         do {
 
             this.service.makeNewEpoch();

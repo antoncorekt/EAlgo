@@ -30,7 +30,6 @@ class GraphicsEngine {
 
     $(document).ready(function (e) {
 
-       
         let fun = function (oper) {
 
             self.update($("input[type=range]").val());
@@ -111,21 +110,20 @@ class GraphicsEngine {
         continue;
       }
 
-      if (population[i].mut){
-        x_arr_mut.push(population[i].x);
-        y_arr_mut.push(population[i].y);
-        z_arr_mut.push(population[i].z);
-        continue;
-      }
-
-      if (population[i].child){
+      if (population[i].is_child){
         x_arr_child.push(population[i].x);
         y_arr_child.push(population[i].y);
         z_arr_child.push(population[i].z);
         continue;
       }
 
-      
+      if (population[i].mut){
+        x_arr_mut.push(population[i].x);
+        y_arr_mut.push(population[i].y);
+        z_arr_mut.push(population[i].z);
+        continue;
+      }
+ 
       x_arr_normal.push(population[i].x);
       y_arr_normal.push(population[i].y);
       z_arr_normal.push(population[i].z);
@@ -138,7 +136,7 @@ class GraphicsEngine {
     normal_obj.z = z_arr_normal;
     normal_obj.marker = {
       color: 'rgb(0, 0, 0)',
-      size: 3,
+      size: 4,
     };
     data.push(normal_obj);
 
@@ -148,7 +146,7 @@ class GraphicsEngine {
     die_obj.z = z_arr_die;
     die_obj.marker = {
       color: 'rgb(102, 102, 153)',
-      size: 2,
+      size: 2.5,
     };
     data.push(die_obj);
 
@@ -157,8 +155,8 @@ class GraphicsEngine {
     mut_obj.y = y_arr_mut;
     mut_obj.z = z_arr_mut;
     mut_obj.marker = {
-      color: 'rgb(0, 0, 200)',
-      3: 4,
+      color: 'rgb(0, 0, 100)',
+      size: 5,
     };
     data.push(mut_obj);
 
@@ -168,7 +166,7 @@ class GraphicsEngine {
     child_obj.z = z_arr_child;
     child_obj.marker = {
       color: 'rgb(51, 204, 51)',
-      size: 4,
+      size: 5,
     };
     data.push(child_obj);
 
@@ -241,27 +239,8 @@ class GraphicsEngine {
 
     let data1 = this.population_to_data(this.time_line[0]);
     this.layout = {
-      scene: {
-        xaxis: {
-          backgroundcolor: "rgb(50, 50, 230)",
-          gridcolor: "rgb(100, 255, 255)",
-          showbackground: true,
-          zerolinecolor: "rgb(255, 100, 255)",
-        },
-        yaxis: {
-          backgroundcolor: "rgb(230, 200,230)",
-          gridcolor: "rgb(255, 255, 255)",
-          showbackground: true,
-          zerolinecolor: "rgb(255, 255, 255)"
-        },
-        zaxis: {
-          backgroundcolor: "rgb(230, 230,200)",
-          gridcolor: "rgb(255, 255, 255)",
-          showbackground: true,
-          zerolinecolor: "rgb(255, 255, 255)"
-        }
-      },
-      autosize: false,
+     
+      autosize: true,
       width: window.innerWidth - document.getElementsByClassName("panel")[0].offsetWidth,
       height: window.innerHeight,
       margin: {
@@ -277,10 +256,8 @@ class GraphicsEngine {
   }
 
   update(num){
-    var layout_update = {
-      title: 'some new title', // updates the title
-  };
-    Plotly.newPlot('engine', this.data[num], layout_update);
+   
+    Plotly.newPlot('engine', this.data[num], this.layout);
   }
 
 

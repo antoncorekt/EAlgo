@@ -16,13 +16,13 @@ class Util {
     static copyPopulations(populations) {
         let res = [];
         for (let i = 0; i < populations.length; i++) {
-            res.push(new Gene(populations[i].x, populations[i].y, populations[i].child));
+            res.push(new Gene(populations[i].x, populations[i].y, populations[i].is_child));
 
             res[i].mut = populations[i].mut;
             res[i].die = populations[i].die;
             res[i].best = populations[i].best;
             res[i].father = populations[i].father;
-            if (populations[i].child) {
+            if (populations[i].is_child) {
                 res[i].parents[0] = populations[i].parents[0];
                 res[i].parents[1] = populations[i].parents[1];
             }
