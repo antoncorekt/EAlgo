@@ -1,16 +1,16 @@
 
 class Model {
 
-    constructor(){
+    constructor(x_left, x_right, mutation_chance, count){
 
-        this.service = new PopulationServise(10);
-        this.service.createFirstPopulation(-20,20,500);
+        this.service = new PopulationServise(mutation_chance);
+        this.service.createFirstPopulation(x_left,x_right,count);
     }
 
 
-    f(){
+    f(max_ep){
 
-        let max_epoch = 20, i = 0;
+        let max_epoch = max_ep, i = 0;
         do {
 
             this.service.makeNewEpoch();

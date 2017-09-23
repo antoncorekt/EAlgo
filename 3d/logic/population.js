@@ -12,6 +12,10 @@ class PopulationServise {
         for (let i = 0; i < count; i++) {
             this.population.push(new Gene(Util.getFloatRandom(left, right), Util.getFloatRandom(left, right), false));
         }
+        let best_gene = Util.getBestResult(this.population, "Object");
+        best_gene.best = true;
+        this.time_line.push(Util.copyPopulations(this.population));
+        this.population.forEach((x) => x.reset());
         this.left = left;
         this.right = right;
     }
@@ -29,45 +33,52 @@ class PopulationServise {
             }
         }
 
-        function createNewChildren(candid) {
+        function createNewChildren(candid, a, b) {
             let parent_a = Util.getBestResult(candid, "Object");
             candid.splice(Util.getBestResult(candid, "Index"), 1);
 
             let parent_b = Util.getBestResult(candid, "Object");
             candid.splice(Util.getBestResult(candid, "Index"), 1);
 
+            let parent_c = Util.getBestResult(candid, "Object");
+            candid.splice(Util.getBestResult(candid, "Index"), 1);
+
             if (candid.length > 0) {
                 let die_obj = Util.getWorstResult(candid, "Object");
                 die_obj.die = true;
             }
-            return Gene.crossover(parent_a, parent_b);
+            return Gene.crossover(parent_a, parent_b, parent_c, a, b);
         }
 
         let j = 0;
         let candidants = [];
         for (let i = 0; i < (cur_pop_len - die_gen) / 4; i++) {
 
-            for (let k = 0; k < 4; k++) {
+            for (let k = 0; k < 5; k++) {
                 let rand = Util.getIntRandom(0, this.population.length - 1);
-                if (this.population[rand].die || this.population[rand].parent || j > 100) {
+                if (this.population[rand].die || this.population[rand].is_parent ) {
                     k--;
                     j++;
-                    continue
-                };
-
+                    if (j>100) break
+                   // console.log(j);
+                    continue;
+                }
+                this.population[rand].is_parent = true;
                 candidants.push(this.population[rand]);
                 j++;
             }
 
-            this.population.push(createNewChildren(candidants));
+            if (candidants.length >= 3){
+               this.population.push(createNewChildren(candidants, this.left, this.right));
+            }
             candidants = [];
             j = 0;
         }
 
 
 
-        if (candidants.length > 2)
-            createNewChildren(candidants);
+       /* if (candidants.length > 2)
+            createNewChildren(candidants, this.left, this.right);*/
 
         let best_gene = Util.getBestResult(this.population, "Object");
         best_gene.best = true;

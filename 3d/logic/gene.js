@@ -14,10 +14,25 @@ class Gene {
         this.life = 0;
     }
 
-    static crossover(parent_a, parent_b){
-        let x = (parent_a.x + parent_b.x)/2.;
-        let y = (parent_a.y + parent_b.y)/2.;
-        let child = new Gene(x,y,true);
+    static crossover(parent_a, parent_b, parent_c, min, max){
+        let stack = [];
+        stack.push(parent_a);
+        stack.push(parent_b);
+        stack.push(parent_c);
+        
+        let best = Util.getBestResult(stack,"Object");
+        stack.splice(Util.getBestResult(stack, "Index"), 1);
+        let g1 = stack[0];
+        let g2 = stack[1];
+        let dX = Math.max(best.x - g1.x, best.x - g2.x) + best.x;
+        let dY = Math.max(best.y - g1.y, best.y - g2.y) + best.y;
+
+        if (dX > max) dX = max;
+        if (dX < min) dX = min;
+        if (dY > max) dY = max;
+        if (dY < min) dY = min;
+
+        let child = new Gene(Util.getFloatRandom(best.x, dX),Util.getFloatRandom(best.y, dY),true);
         child.parents.push(parent_a);
         child.parents.push(parent_b);
         

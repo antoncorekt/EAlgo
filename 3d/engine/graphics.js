@@ -1,12 +1,12 @@
 
 class GraphicsEngine {
 
-  constructor(x_left, x_right) {
+  constructor(x_left, x_right, mutation_chance, max_epoch, count) {
     this.x_left = x_left;
     this.x_right = x_right;
 
-    this.model = new Model();
-    this.servise = this.model.f();
+    this.model = new Model(x_left, x_right, mutation_chance, count);
+    this.servise = this.model.f(max_epoch);
     this.time_line = this.servise.time_line;
     this.layout = null;
   }
@@ -33,17 +33,17 @@ class GraphicsEngine {
         let fun = function (oper) {
 
             self.update($("input[type=range]").val());
-           /* let val = $("input[type=range]").val();
-            $("#epoch").text("Epoch: " + $("input[type=range]").val() + " from " + (self.data.time_line.length - 1));
+            let val = $("input[type=range]").val();
+            $("#epoch").text("Epoch: " + $("input[type=range]").val() + " from " + (self.time_line.length - 1));
 
 
             let child = 0, sum = 0, mut = 0, die = 0, all = 0; // данный которые нужно собрать в процессе прохода по данным
-            self.data.time_line[val].forEach(
+            self.time_line[val].forEach(
                 (x) => {
                     if (!x.die) {
                         all++;
-                        sum += Util.f(x);
-                        if (x.child)
+                        sum += x.z;
+                        if (x.is_child)
                             child++;
                         if (x.mut)
                             mut++;
@@ -56,11 +56,12 @@ class GraphicsEngine {
             $("#popul").text("Count populations: " + all);
             $("#die").text("Count dead gens: " + die);
             $("#new_child").text("New child in epoch: " + child);
-            $("#best_res").text("Best result in epoch: " + self.model.getBestRes(self.data.time_line[val], "f(x)"));
-            $("#aver_res").text("Average result in epoch: " + sum / self.data.time_line[val].length);
-            $("#mutat").text("Mutation: " + mut);*/
+            $("#best_res").text("Best result in epoch: " + Util.getBestResult(self.time_line[val], "f(x)"));
+            $("#aver_res").text("Average result in epoch: " + sum / self.time_line[val].length);
+            $("#mutat").text("Mutation: " + mut);
         }
-        
+
+        fun();
 
         $(document).on('keypress', function (e) {
 
@@ -134,6 +135,7 @@ class GraphicsEngine {
     normal_obj.x = x_arr_normal;
     normal_obj.y = y_arr_normal;
     normal_obj.z = z_arr_normal;
+    normal_obj.name = "Normal";
     normal_obj.marker = {
       color: 'rgb(0, 0, 0)',
       size: 4,
@@ -144,9 +146,10 @@ class GraphicsEngine {
     die_obj.x = x_arr_die;
     die_obj.y = y_arr_die;
     die_obj.z = z_arr_die;
+    die_obj.name = "Dead";
     die_obj.marker = {
       color: 'rgb(102, 102, 153)',
-      size: 2.5,
+      size: 1.5,
     };
     data.push(die_obj);
 
@@ -154,8 +157,9 @@ class GraphicsEngine {
     mut_obj.x = x_arr_mut;
     mut_obj.y = y_arr_mut;
     mut_obj.z = z_arr_mut;
+    mut_obj.name = "Mutatated";
     mut_obj.marker = {
-      color: 'rgb(0, 0, 100)',
+      color: 'rgb(244, 66, 203)',
       size: 5,
     };
     data.push(mut_obj);
@@ -164,6 +168,7 @@ class GraphicsEngine {
     child_obj.x = x_arr_child;
     child_obj.y = y_arr_child;
     child_obj.z = z_arr_child;
+    child_obj.name = "Child";
     child_obj.marker = {
       color: 'rgb(51, 204, 51)',
       size: 5,
@@ -174,6 +179,7 @@ class GraphicsEngine {
     best_obj.x = x_arr_best;
     best_obj.y = y_arr_best;
     best_obj.z = z_arr_best;
+    best_obj.name = "Best";
     best_obj.marker = {
       color: 'rgb(255, 0, 0)',
       size: 7,
@@ -240,7 +246,8 @@ class GraphicsEngine {
     let data1 = this.population_to_data(this.time_line[0]);
     this.layout = {
      
-      autosize: true,
+      autosize: false,
+      
       width: window.innerWidth - document.getElementsByClassName("panel")[0].offsetWidth,
       height: window.innerHeight,
       margin: {
@@ -250,14 +257,27 @@ class GraphicsEngine {
         t: 50,
         pad: 4
       },
+      scene:{
+      xaxis: {
+        nticks: 9,
+        range: [-20, 20],
+      },
+       yaxis: {
+        nticks: 7,
+        range: [-20, 20],
+      },
+       zaxis: {
+       nticks: 10,
+       range: [-450, 0],
+      }}
     };
 
-    Plotly.newPlot('engine', data1, this.layout);
+    Plotly.newPlot('engine', data1, this.layout, {displayModeBar: false});
   }
 
   update(num){
    
-    Plotly.newPlot('engine', this.data[num], this.layout);
+    Plotly.newPlot('engine', this.data[num], this.layout, {displayModeBar: false});
   }
 
 
